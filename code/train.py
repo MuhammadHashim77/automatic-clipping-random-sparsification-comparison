@@ -278,31 +278,33 @@ def train(args):
     print("Validation Dice Scores: ", validation_dice_scores_str)
     print("Validation Accuracies: ", validation_accuracies_str)
 
-    # Training Average Loss Over Time
-    epochs = list(range(1, iterations + 1))
-    name = f"{algorithm}: Training Average Loss Over Time for {dataset}"
-    plot_location = f"results/{algorithm}/{model_name}/{dataset}"
-    if not os.path.exists(f"{plot_location}/{name}"):
-        os.makedirs(plot_location)
-    plt.figure()
-    plt.plot(epochs, training_losses, label="Train Average Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Training Average Loss")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
+    plot_dir = f"results/{algorithm}/{model_name}/{dataset}"
+    os.makedirs(plot_dir, exist_ok=True)
 
-    # Training Epoch Time Over Time
-    name = f"{algorithm}: Training Time per Epoch Over Time for {dataset}"
-    plt.figure()
-    plt.plot(epochs, iteration_train_times, label="Train Epoch Time")
-    plt.xlabel("Epoch")
-    plt.ylabel("Training Time")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
+    # Define the metrics to plot
+    metrics = {
+        "Loss Curve":       (training_losses,      'tab:olive',  'Training Loss'),
+        "Validation Curve": (validation_losses,    'tab:teal',   'Validation Loss'),
+        "Epoch Time Curve": (iteration_train_times,'tab:maroon','Epoch Time (s)'),
+    }
+
+    for title, (data, color, ylabel) in metrics.items():
+        plt.figure(figsize=(7, 4))
+        epochs = list(range(1, len(data) + 1))
+        plt.plot(
+            epochs, data,
+            marker='D',
+            linestyle='-.',
+            color=color
+        )
+        plt.title(f"{algorithm} – {title}")
+        plt.xlabel("Epoch")
+        plt.ylabel(ylabel)
+        plt.grid(True, linestyle=':', alpha=0.6)
+        filename = f"{algorithm.lower().replace(' ', '_')}_{title.lower().replace(' ', '_')}.png"
+        plt.tight_layout()
+        plt.savefig(os.path.join(plot_dir, filename), dpi=150)
+        plt.close()
 
     # Save the model results
     save_results_to_csv(

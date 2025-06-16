@@ -49,18 +49,26 @@ def predict(model, img):
 
 
 def plot_prediction(image, mask, prediction, file_name):
-    fig, axs = plt.subplots(1, 4, figsize=(15, 5))
-    axs[0].imshow(image, cmap="gray")
-    axs[0].set_title("Original Image")
-    axs[1].imshow(mask, cmap="jet")
-    axs[1].set_title("Ground Truth Mask")
-    axs[2].imshow(prediction, cmap="gray")
-    axs[2].set_title("Predicted Grayscale Mask")
-    axs[3].imshow(prediction, cmap="jet")
-    axs[3].set_title("Predicted Mask")
+    # 3-panel view: input, ground truth, model output
+    fig, axs = plt.subplots(1, 3, figsize=(12, 4))
+
+    axs[0].imshow(image, cmap='gray')
+    axs[0].set_title('Input Image', fontsize=12)
+
+    axs[1].imshow(mask, cmap='plasma')
+    axs[1].set_title('True Segmentation', fontsize=12)
+
+    axs[2].imshow(prediction, cmap='viridis')
+    axs[2].set_title('Model Output', fontsize=12)
+
+    # clean up axes
     for ax in axs:
-        ax.axis("off")
-    plt.savefig(file_name)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    plt.tight_layout(pad=2.0)
+    plt.savefig(file_name, dpi=200)
+    plt.close(fig)
 
 
 def main():

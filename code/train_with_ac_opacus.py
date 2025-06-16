@@ -322,66 +322,29 @@ def train(args):
     print("Validation Accuracies: ", validation_accuracies_str)
     print("Overall Privacy Spent: ", overall_privacy_spent)
 
-    # Plotting Privacy Epsilon Over Time
-    epochs = list(range(1, iterations + 1))
-    name = f"{algorithm}: Privacy Epsilon Over Time for {dataset}"
-    plot_location = f"results/{algorithm}/{model_name}/{dataset}/{location}"
-    if not os.path.exists(f"{plot_location}"):
-        os.makedirs(plot_location)
-    plt.plot(epochs, overall_privacy_spent)
-    plt.xlabel("Epoch")
-    plt.ylabel("Epsilon")
-    plt.title(name)
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
+    plot_dir = f"results/{algorithm}/{model_name}/{dataset}/{location}"
+    os.makedirs(plot_dir, exist_ok=True)
 
-    # Training Average Loss Over Time
-    name = f"{algorithm}: Training Average Loss Over Time for {dataset}"
-    plt.figure()
-    plt.plot(epochs, training_losses, label="Train Average Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Training Average Loss")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
+    # Define the metrics to plot
+    metrics = {
+    "DP Trend":              (overall_privacy_spent, 'tab:blue',  'Privacy ε'),
+    "Average Training Loss": (training_losses,      'tab:green', 'Avg Loss'),
+    "Epoch Training Loss":   (train_epoch_losses,   'tab:red',   'Epoch Loss'),
+    }
 
-    # Training Epoch Time Over Time
-    name = f"{algorithm}: Training Time per Epoch Over Time for {dataset}"
-    plt.figure()
-    plt.plot(epochs, iteration_train_times, label="Train Epoch Time")
-    plt.xlabel("Epoch")
-    plt.ylabel("Training Time")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
-
-    # Training Epoch Loss Over Time
-    name = f"{algorithm}: Training Epoch Loss Over Time for {dataset}"
-    plt.figure()
-    plt.plot(epochs, train_epoch_losses, label="Train Epoch Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Train Epoch Loss")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
-
-    # Iteration Time Per Epoch Over Time
-    name = f"{algorithm}: Iteration Train Time Over Time for {dataset}"
-    plt.figure()
-    plt.plot(
-        range(1, len(iteration_train_times) + 1),
-        iteration_train_times,
-        label="Iteration Train Time",
-    )
-    plt.xlabel("Epoch")
-    plt.ylabel("Time (s)")
-    plt.title(name)
-    plt.legend()
-    plt.savefig(f"{plot_location}/{name}")
-    plt.show(block=False)
+    for label, (values, color, ylabel) in metrics.items():
+        plt.figure(figsize=(6, 4))
+        epochs = list(range(1, len(values) + 1))
+        plt.plot(epochs, values, marker='o', linestyle='-', color=color, label=ylabel)
+        plt.xlabel("Epoch")
+        plt.ylabel(ylabel)
+        plt.title(f"{algorithm} – {label}")
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.legend()
+        plt.tight_layout()
+        fn = f"{algorithm.lower().replace(' ', '_')}_{label.lower().replace(' ', '_')}.png"
+        plt.savefig(os.path.join(plot_dir, fn), dpi=150)
+        plt.close()
 
     save_results_to_csv(
         # Location

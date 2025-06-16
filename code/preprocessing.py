@@ -10,37 +10,27 @@ from octprocessing import get_unlabelled_bscans, get_valid_img_seg_reimpl
 from tqdm import tqdm
 
 
-def plot_label(path, label):
-    x = np.load(path, allow_pickle=True).item()
-    plt.imshow(x[label])
-    plt.show()
+def plot_prediction(image, mask, prediction, file_name):
+    # 3-panel view: input, ground truth, model output
+    fig, axs = plt.subplots(1, 3, figsize=(12, 4))
 
+    axs[0].imshow(image, cmap='gray')
+    axs[0].set_title('Input Image', fontsize=12)
 
-def plot_img(path):
-    plot_label(path, "images")
+    axs[1].imshow(mask, cmap='plasma')
+    axs[1].set_title('True Segmentation', fontsize=12)
 
+    axs[2].imshow(prediction, cmap='viridis')
+    axs[2].set_title('Model Output', fontsize=12)
 
-def plot_full_img(path, b_scan_idx=0):
-    x = np.load(path, allow_pickle=True).item()
-    fig, axes = plt.subplots(1, 2)
-    img, mask = get_valid_img_seg_reimpl(x)
+    # clean up axes
+    for ax in axs:
+        ax.set_xticks([])
+        ax.set_yticks([])
 
-    axes[0].imshow(mask[:, :, b_scan_idx], cmap=plt.cm.jet, vmax=9)
-    axes[0].set_title("mask")
-    axes[1].imshow(img[:, :, b_scan_idx])
-    axes[1].set_title("image")
-    plt.show()
-
-
-def plot_sliced_img(dataset_path, sample_file_name):
-    fig, axes = plt.subplots(1, 2)
-    img = np.load(os.path.join(os.path.join(dataset_path, "images"), sample_file_name))
-    mask = np.load(os.path.join(os.path.join(dataset_path, "masks"), sample_file_name))
-    axes[0].imshow(mask, cmap=plt.cm.jet, vmax=9)
-    axes[0].set_title("mask")
-    axes[1].imshow(img)
-    axes[1].set_title("image")
-    plt.show()
+    plt.tight_layout(pad=2.0)
+    plt.savefig(file_name, dpi=200)
+    plt.close(fig)
 
 
 def test_slicing(path):
